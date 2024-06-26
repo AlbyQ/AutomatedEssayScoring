@@ -1,5 +1,6 @@
 import pickle
 
+import cupy as cp
 import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -16,9 +17,12 @@ X_train = vectorizer.fit_transform(train_data['full_text']).toarray()
 X_test = vectorizer.transform(test_data['full_text']).toarray()
 y_train = train_data['score']
 
+X_train = cp.array(X_train)
+X_test = cp.array(X_test)
+
 X_tr, X_val, y_tr, y_val = train_test_split(X_train, y_train, test_size=0.2, random_state=42)
 
-xgb = XGBRegressor(tree_method='gpu_hist', predictor='gpu_predictor', random_state=42)
+xgb = XGBRegressor(tree_method='hist', device='cuda', random_state=42)
 
 param_dist = {
     'n_estimators': [100, 200, 300],
